@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { supabase, isSupabaseConfigured } from './lib/supabase';
+import { supabase, isSupabaseConfigured } from './supabase';
 import { Profile } from './types';
 import Auth from './components/Auth';
 import UpdatePassword from './components/UpdatePassword';
