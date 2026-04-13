@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { supabase, isSupabaseConfigured } from './supabase';
+import { supabase, isSupabaseConfigured } from './supabase.js';
 import { Trophy, LogOut } from 'lucide-react';
 
 export default function App() {
