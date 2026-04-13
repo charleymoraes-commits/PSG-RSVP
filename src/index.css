@@ -1,11 +1,49 @@
-import { Trophy } from 'lucide-react';
+@import "tailwindcss";
 
-export default function App() {
-  return (
-    <div className="min-h-screen bg-black text-white p-8 flex flex-col items-center justify-center">
-      <Trophy className="text-green-400 mb-4" size={64} />
-      <h1 className="text-4xl font-black italic">PSG PERTH</h1>
-      <p className="mt-4 text-gray-400">Pitch is ready! Deployment successful.</p>
-    </div>
-  );
+@theme {
+  --color-pitch: #00ff66;
+  --color-pitch-dark: #00cc52;
+  --color-highlight: #ff3b30;
+}
+
+:root {
+  color-scheme: dark;
+}
+
+body {
+  @apply bg-black text-white antialiased selection:bg-pitch selection:text-black;
+  font-feature-settings: "ss01", "ss02", "cv01", "cv02";
+}
+
+.glass-card {
+  @apply bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl;
+}
+
+.neon-border {
+  @apply border-white/10 hover:border-white/30 transition-all duration-500;
+  box-shadow: 0 0 40px rgba(0, 0, 0, 0.5);
+}
+
+.neon-glow {
+  box-shadow: 0 0 80px rgba(0, 255, 102, 0.05);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  @apply bg-black;
+}
+::-webkit-scrollbar-thumb {
+  @apply bg-white/10 rounded-full hover:bg-white/20 transition-colors;
+}
+
+@keyframes pulse-slow {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 0.6; }
+}
+
+.animate-pulse-slow {
+  animation: pulse-slow 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
