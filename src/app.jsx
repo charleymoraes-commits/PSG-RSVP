@@ -1,48 +1,110 @@
-import React, { useState } from 'react';
-import { supabase } from './supabase.js';
+import { useEffect, useState } from 'react';
+import { supabase, isSupabaseConfigured } from './lib/supabase';
+// import { Profile } from './types'; // Removed: Not needed in JSX
+import Auth from './components/Auth';
+import UpdatePassword from './components/UpdatePassword';
+import MatchView from './components/MatchView';
+import HistoryView from './components/HistoryView';
+import AdminView from './components/AdminView';
+import PublicGameView from './components/PublicGameView';
+import { motion, AnimatePresence } from 'motion/react';
+import { Trophy, History, ShieldAlert, LogOut, RefreshCw } from 'lucide-react';
+import { cn } from './lib/utils';
 
 export default function App() {
-  const [user, setUser] = useState(null); // This tracks if someone "logged in"
-  const [name, setName] = useState('');
-  const [status, setStatus] = useState(null);
+  const [session, setSession] = useState(null);
+  const [profile, setProfile] = useState(null);
+  const [activeTab, setActiveTab] = useState('match');
+  const [loading, setLoading] = useState(true);
+  const [isResettingPassword, setIsResettingPassword] = useState(false);
 
-  const handleRSVP = async (choice) => {
-    const { error } = await supabase
-      .from('players')
-      .insert([{ name: user, status: choice }]); // Now it saves THEIR name
+  // Handle Public Route (/match/:id)
+  const path = window.location.pathname;
+  const isPublicRoute = path.startsWith('/match/');
+  const publicGameId = isPublicRoute ? path.split('/')[2] : null;
 
-    if (!error) setStatus(choice === 'in' ? 'CONVOCADO! ⚽️' : 'OUT');
+  useEffect(() => {
+    if (!isSupabaseConfigured) {
+      setLoading(false);
+      return;
+    }
+
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      if (session) fetchProfile(session.user.id);
+      else setLoading(false);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'PASSWORD_RECOVERY') setIsResettingPassword(true);
+      setSession(session);
+      if (session) fetchProfile(session.user.id);
+      else {
+        setProfile(null);
+        setLoading(false);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const fetchProfile = async (userId) => {
+    const { data } = await supabase.from('profiles').select('*').eq('id', userId).single();
+    if (data) setProfile(data);
+    setLoading(false);
   };
 
-  // 🏟️ THE LOGIN VIEW
-  if (!user) {
-    return (
-      <div style={{ background: 'black', minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: '#00ff66', fontFamily: 'sans-serif' }}>
-        <h1 style={{ fontStyle: 'italic', fontSize: '3rem' }}>PSG PERTH</h1>
-        <p style={{ color: 'white', marginBottom: '20px' }}>ENTER YOUR NAME TO ACCESS</p>
-        <input 
-          value={name} 
-          onChange={(e) => setName(e.target.value)}
-          placeholder="Squad Name..."
-          style={{ background: '#111', border: '1px solid #00ff66', color: 'white', padding: '15px', borderRadius: '8px', marginBottom: '10px', width: '250px' }}
-        />
-        <button 
-          onClick={() => user === '' ? null : setUser(name)}
-          style={{ background: '#00ff66', color: 'black', border: 'none', padding: '15px 30px', fontWeight: 'bold', borderRadius: '8px', cursor: 'pointer' }}
-        >
-          ENTER MATCH CENTRE
-        </button>
-      </div>
-    );
-  }
+  const handleLogout = () => supabase.auth.signOut();
 
-  // 🏟️ THE RSVP VIEW (What you see in your screenshot)
+  if (loading) return (
+    <div className="min-h-screen bg-black flex items-center justify-center">
+      <div className="text-pitch animate-pulse text-4xl font-black italic text-[#00ff66]">PSG PERTH</div>
+    </div>
+  );
+
+  if (isResettingPassword) return <UpdatePassword onComplete={() => setIsResettingPassword(false)} />;
+  if (isPublicRoute && publicGameId) return <PublicGameView gameId={publicGameId} />;
+  if (!session) return <Auth />;
+
   return (
-    <div style={{ background: 'black', minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-       {/* All your existing button code goes here */}
-       <h1 style={{ color: '#00ff66', fontStyle: 'italic' }}>PSG PERTH</h1>
-       <p style={{ color: 'white' }}>WELCOME, {user.toUpperCase()}</p>
-       {/* ... (buttons) ... */}
+    <div className="min-h-screen bg-black pb-24 md:pb-0 md:pt-20">
+      <header className="fixed top-0 left-0 right-0 z-50 bg-black/80 backdrop-blur-xl border-b border-white/5 px-6 py-4">
+        <div className="max-w-6xl mx-auto flex items-center justify-between">
+          <div className="text-xl md:text-2xl font-black italic text-white">PSG PERTH</div>
+          <nav className="hidden md:flex items-center gap-1 bg-white/5 p-1 rounded-xl">
+            {[
+              { id: 'match', label: 'Match', icon: Trophy },
+              { id: 'history', label: 'History', icon: History },
+              { id: 'admin', label: 'Admin', icon: ShieldAlert },
+            ].map(tab => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={cn(
+                  "flex items-center gap-2 px-6 py-2 rounded-lg transition-all font-bold text-sm",
+                  activeTab === tab.id ? "bg-white text-black" : "text-white/60 hover:text-white"
+                )}
+              >
+                <tab.icon size={18} /> {tab.label}
+              </button>
+            ))}
+          </nav>
+          <div className="flex items-center gap-4">
+            <button onClick={() => fetchProfile(session.user.id)} className="p-2 text-white/40 hover:text-white"><RefreshCw size={18} /></button>
+            <button onClick={handleLogout} className="p-2 text-white/40 hover:text-red-500"><LogOut size={20} /></button>
+          </div>
+        </div>
+      </header>
+
+      <main className="p-6 md:p-12 max-w-6xl mx-auto mt-16 md:mt-0">
+        <AnimatePresence mode="wait">
+          <motion.div key={activeTab} initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -10 }}>
+            {activeTab === 'match' && <MatchView user={session.user} profile={profile} onGoToAdmin={() => setActiveTab('admin')} />}
+            {activeTab === 'history' && <HistoryView user={session.user} />}
+            {activeTab === 'admin' && (profile?.is_admin ? <AdminView /> : <div className="text-center py-20 text-white/40">Admin Access Required</div>)}
+          </motion.div>
+        </AnimatePresence>
+      </main>
     </div>
   );
 }
