@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { createClient } from '@supabase/supabase-js';
 
-// 1. DATABASE CONNECTION (Keep this at the top)
+// DATABASE CONNECTION
 const supabase = createClient(import.meta.env.VITE_SUPABASE_URL, import.meta.env.VITE_SUPABASE_ANON_KEY);
 
 export default function App() {
@@ -25,34 +25,29 @@ export default function App() {
     if (!error) {
       setStatus(choice === 'in' ? 'CONVOCADO! ⚽️' : 'FORA DA RODADA');
     } else {
-      // This triggers that purple alert you saw
       alert("Database Error: Check your Supabase RLS settings!");
     }
     setLoading(false);
   };
 
-  // DESIGN: LOGIN SCREEN
   if (!user) {
     return (
       <div style={{ background: 'black', minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: '#00ff66', fontFamily: 'sans-serif', padding: '20px' }}>
         <h1 style={{ fontStyle: 'italic', fontSize: '4rem', margin: '0', fontWeight: '900', letterSpacing: '-2px' }}>PSG PERTH</h1>
         <p style={{ color: 'white', marginBottom: '40px', letterSpacing: '3px', fontSize: '0.8rem', opacity: 0.6 }}>MATCH CENTRE ACCESS</p>
-        
         <input 
           value={inputName} 
           onChange={(e) => setInputName(e.target.value)} 
           placeholder="ENTER SQUAD NAME..." 
           style={{ background: '#111', border: '1px solid #00ff66', color: 'white', padding: '20px', borderRadius: '12px', width: '100%', maxWidth: '300px', marginBottom: '15px', textAlign: 'center', fontSize: '1rem', fontWeight: 'bold' }} 
         />
-        
-        <button onClick={handleLogin} style={{ background: '#00ff66', color: 'black', border: 'none', padding: '18px 60px', fontWeight: '900', borderRadius: '12px', cursor: 'pointer', fontSize: '1.1rem', boxShadow: '0 0 20px rgba(0, 255, 102, 0.3)' }}>
+        <button onClick={handleLogin} style={{ background: '#00ff66', color: 'black', border: 'none', padding: '18px 60px', fontWeight: '900', borderRadius: '12px', cursor: 'pointer', fontSize: '1.1rem', boxShadow: '0 0 20px rgba(0,255,102,0.3)' }}>
           ENTER
         </button>
       </div>
     );
   }
 
-  // DESIGN: RSVP SCREEN (The "Senior Designer" Look)
   return (
     <div style={{ background: 'black', minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', fontFamily: 'sans-serif', padding: '20px' }}>
       <h1 style={{ color: '#00ff66', fontStyle: 'italic', fontSize: '4.5rem', margin: '0', fontWeight: '900', letterSpacing: '-3px' }}>PSG PERTH</h1>
@@ -67,14 +62,13 @@ export default function App() {
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', width: '100%', maxWidth: '320px' }}>
-         <button 
+          <button 
             disabled={loading}
             onClick={() => handleRSVP('in')} 
             style={{ background: '#00ff66', color: 'black', border: 'none', padding: '25px', fontSize: '1.8rem', fontWeight: '900', borderRadius: '16px', cursor: 'pointer' }}
           >
             {loading ? '...' : "I'M IN"}
           </button>
-          
           <button 
             disabled={loading}
             onClick={() => handleRSVP('out')} 
@@ -82,3 +76,9 @@ export default function App() {
           >
             OUT
           </button>
+        </div>
+      )}
+      <p style={{ marginTop: '60px', color: '#333', fontSize: '0.8rem', fontWeight: 'bold' }}>LOGGED IN AS: {user.toUpperCase()}</p>
+    </div>
+  );
+}
