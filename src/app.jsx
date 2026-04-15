@@ -67,7 +67,18 @@ export default function App() {
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', width: '100%', maxWidth: '320px' }}>
-          <button 
+         <button 
             disabled={loading}
             onClick={() => handleRSVP('in')} 
-            style={{ background: '#00ff66', color: 'black', border: 'none', padding: '25px', fontSize: '1.8rem', fontWeight: '900
+            style={{ background: '#00ff66', color: 'black', border: 'none', padding: '25px', fontSize: '1.8rem', fontWeight: '900', borderRadius: '16px', cursor: 'pointer' }}
+          >
+            {loading ? '...' : "I'M IN"}
+          </button>
+          
+          <button 
+            disabled={loading}
+            onClick={() => handleRSVP('out')} 
+            style={{ background: 'transparent', color: '#ff4444', border: '2px solid #ff4444', padding: '18px', fontSize: '1.2rem', fontWeight: 'bold', borderRadius: '16px', cursor: 'pointer' }}
+          >
+            OUT
+          </button>
