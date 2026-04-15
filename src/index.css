@@ -1,11 +1,24 @@
-import { createClient } from '@supabase/supabase-js';
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+:root {
+  color-scheme: dark;
+}
 
-export const isSupabaseConfigured = !!(supabaseUrl && supabaseAnonKey);
+body {
+  background-color: black;
+  color: white;
+  -webkit-font-smoothing: antialiased;
+}
 
-export const supabase = createClient(
-  supabaseUrl || 'https://placeholder.supabase.co',
-  supabaseAnonKey || 'placeholder'
-);
+.glass-card {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 32px;
+}
+
+.neon-glow {
+  box-shadow: 0 0 40px rgba(0, 255, 102, 0.15);
+}
